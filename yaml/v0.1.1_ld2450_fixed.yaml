@@ -1,0 +1,16 @@
+esphome:
+  name: ld2450_unit
+  includes:
+    - ld2450.h
+
+external_components:
+  - source: github://yourrepo/esphome-ld2450
+
+uart:
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 256000
+
+sensor:
+  - platform: ld2450
+    name: "LD2450 Presence"
