@@ -1,0 +1,24 @@
+esphome:
+  name: ld2450_ota
+  platform: ESP32
+  board: esp32dev
+
+ota:
+
+wifi:
+  ssid: "testssid"
+  password: "testpass"
+  ap:
+    ssid: "fallback_ld2450"
+    password: "backup123"
+
+logger:
+
+uart:
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 256000
+
+sensor:
+  - platform: ld2450
+    name: "LD2450 Presence"
