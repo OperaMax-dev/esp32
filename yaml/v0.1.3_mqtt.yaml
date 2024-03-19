@@ -1,0 +1,9 @@
+mqtt:
+  broker: 192.168.1.100
+  username: mqttuser
+  password: mqttpass
+
+sensor:
+  - platform: ld2450
+    name: "LD2450 Presence"
+    state_topic: ld2450/presence
