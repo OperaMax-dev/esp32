@@ -1,0 +1,18 @@
+uart:
+  - id: uart0
+    tx_pin: GPIO17
+    rx_pin: GPIO16
+    baud_rate: 256000
+  - id: uart1
+    tx_pin: GPIO22
+    rx_pin: GPIO21
+    baud_rate: 115200
+
+sensor:
+  - platform: ld2450
+    uart_id: uart0
+    name: "LD2450 Presence"
+
+  - platform: ld2412
+    uart_id: uart1
+    name: "LD2412 Secondary"
