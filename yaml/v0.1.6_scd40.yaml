@@ -1,0 +1,15 @@
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+sensor:
+  - platform: scd4x
+    co2:
+      name: "SCD40 CO2"
+    temperature:
+      name: "SCD40 Temp"
+    humidity:
+      name: "SCD40 Humidity"
+    address: 0x62
+    update_interval: 15s
