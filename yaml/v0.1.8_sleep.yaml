@@ -1,0 +1,8 @@
+deep_sleep:
+  run_duration: 60s
+  sleep_duration: 5min
+
+switch:
+  - platform: gpio
+    pin: GPIO2
+    id: control_pin
