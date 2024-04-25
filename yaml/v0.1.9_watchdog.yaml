@@ -1,0 +1,15 @@
+esphome:
+  name: reset_on_fail
+  on_boot:
+    priority: -10
+    then:
+      - delay: 30s
+      - lambda: |-
+          if (!id(ld2450).has_state()) {
+            ESP.restart();
+          }
+
+sensor:
+  - platform: ld2450
+    name: "LD2450 Presence"
+    id: ld2450
