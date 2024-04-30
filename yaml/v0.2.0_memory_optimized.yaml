@@ -1,0 +1,10 @@
+sensor:
+  - platform: scd4x
+    co2:
+      name: "CO2"
+    temperature:
+      name: "Temp"
+    humidity:
+      name: "Humidity"
+    address: 0x62
+    update_interval: 60s
