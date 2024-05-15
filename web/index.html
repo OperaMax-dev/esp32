@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32 Presence Sensor Debug UI</title>
+  <style>
+    body { font-family: Arial; background: #f2f2f2; padding: 2em; }
+    h1, h2 { color: #333; }
+    .card { background: white; padding: 1em; border-radius: 5px; margin-bottom: 1.5em; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 0.5em; }
+    input[type=text], input[type=number] { width: 100%; padding: 0.5em; }
+    button { margin-top: 1em; padding: 0.6em 1.2em; background: #007acc; color: white; border: none; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 Sensor Debug UI</h1>
+
+  <div class="card">
+    <h2>Status</h2>
+    <p><strong>LD2450:</strong> <span id="ld2450">...</span></p>
+    <p><strong>LD2412:</strong> <span id="ld2412">...</span></p>
+    <p><strong>CO2:</strong> <span id="co2">...</span></p>
+    <p><strong>Temperature:</strong> <span id="temp">...</span></p>
+    <p><strong>Humidity:</strong> <span id="humidity">...</span></p>
+  </div>
+
+  <div class="card">
+    <h2>Settings</h2>
+    <form id="settingsForm">
+      <label>Update Interval (ms):
+        <input type="number" name="interval" id="interval" value="5000">
+      </label>
+      <label>MQTT Broker:
+        <input type="text" name="mqtt" id="mqtt" value="192.168.1.100">
+      </label>
+      <button type="submit">Save Settings</button>
+    </form>
+  </div>
+
+  <script>
+    async function fetchStatus() {
+      const res = await fetch("/api/status");
+      const data = await res.json();
+      document.getElementById("ld2450").textContent = data.ld2450;
+      document.getElementById("ld2412").textContent = data.ld2412;
+      document.getElementById("co2").textContent = data.co2 + " ppm";
+      document.getElementById("temp").textContent = data.temp + " °C";
+      document.getElementById("humidity").textContent = data.humidity + " %";
+    }
+
+    document.getElementById("settingsForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const interval = document.getElementById("interval").value;
+      const mqtt = document.getElementById("mqtt").value;
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval, mqtt })
+      });
+    });
+
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+  </script>
+</body>
+</html>
+
+<!-- Buttons added to UI -->
+<div class="card">
+  <h2>Device Control</h2>
+  <button onclick="fetch('/api/reboot', { method: 'POST' })">Reboot Device</button>
+  <button onclick="fetch('/api/reset', { method: 'POST' })">Factory Reset</button>
+</div>
+<div class="card">
+  <h2>Logs</h2>
+  <a href="/logs/latest" target="_blank">
+    <button>Download Log File</button>
+  </a>
+</div>
+<script>
+async function toggleSensors(ld2450, ld2412) {
+  await fetch("/api/sensors", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ld2450: ld2450, ld2412: ld2412 })
+  });
+}
+</script>
+<div class="card">
+  <h2>Sensor Control</h2>
+  <p>LD2450: <span id="ld2450_state">...</span> 
+    <button onclick="toggleSensor('ld2450')">Toggle</button>
+  </p>
+  <p>LD2412: <span id="ld2412_state">...</span> 
+    <button onclick="toggleSensor('ld2412')">Toggle</button>
+  </p>
+</div>
+
+<script>
+async function updateSensorStates() {
+  const res = await fetch("/api/status");
+  const data = await res.json();
+  document.getElementById("ld2450_state").textContent = data.ld2450;
+  document.getElementById("ld2412_state").textContent = data.ld2412;
+}
+
+async function toggleSensor(sensor) {
+  const current = document.getElementById(sensor + "_state").textContent === "Active";
+  const payload = {};
+  payload[sensor] = !current;
+  await fetch("/api/sensors", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  updateSensorStates();
+}
+
+updateSensorStates();
+setInterval(updateSensorStates, 7000);
+</script>
