@@ -1,0 +1,2 @@
+[DEBUG] Dynamic sensor toggle added via /api/sensors
+[INFO] Accepts POST JSON { ld2450: true/false, ld2412: true/false }
