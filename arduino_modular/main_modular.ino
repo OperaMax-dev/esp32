@@ -1,25 +1,50 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
 #include "SensorManager.h"
 #include "ConfigManager.h"
 #include "WebServerSetup.h"
+#include "WiFiManager.h"
+#include "SecurityManager.h"
+#include "ErrorHandler.h"
 
 SensorManager sensorManager;
 ConfigManager configManager;
 AsyncWebServer server(80);
+WiFiManager wifiManager("SSID", "PASSWORD");
+SecurityManager securityManager("admin", "esp32admin", "your-secret-key");
+ErrorHandler errorHandler;
 
 void setup() {
-  Serial.begin(115200);
-  WiFi.begin(configManager.getSSID(), configManager.getPassword());
-  while (WiFi.status() != WL_CONNECTED) delay(500);
-
-  configManager.begin();
-  sensorManager.begin();
-  setupWebServer(server, sensorManager, configManager);
-  server.begin();
+    Serial.begin(115200);
+    
+    errorHandler.begin();
+    
+    if (!wifiManager.begin()) {
+        errorHandler.logError("WiFi", "Initial connection failed");
+    }
+    
+    if (!LittleFS.begin()) {
+        errorHandler.logError("FS", "LittleFS mount failed");
+        return;
+    }
+    
+    configManager.begin();
+    
+    if (!sensorManager.begin()) {
+        errorHandler.logError("Sensors", "Initialization failed");
+    }
+    
+    setupWebServer(server, sensorManager, configManager, securityManager);
+    server.begin();
 }
 
 void loop() {
-  sensorManager.loop();
-  delay(configManager.getUpdateInterval());
+    wifiManager.loop();
+    
+    if (wifiManager.isConnected()) {
+        sensorManager.loop();
+    }
+    
+    delay(configManager.getUpdateInterval());
 }
